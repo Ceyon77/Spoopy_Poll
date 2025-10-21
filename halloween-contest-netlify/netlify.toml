@@ -1,0 +1,12 @@
+[build]
+  publish = "public"
+  command = ""
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+  external_node_modules = ["@netlify/blobs"]
+
+# Optional: force Node 18+ runtime (supports ESM imports nicely)
+[functions."*"]
+  node_bundler = "esbuild"

@@ -1,0 +1,47 @@
+{
+  "eventName": "Spoopy Costume Contest 2025",
+  "scoring": {
+    "scaleMin": 1,
+    "scaleMax": 10
+  },
+  "categories": [
+    {
+      "id": "craft",
+      "name": "Craftsmanship"
+    },
+    {
+      "id": "theme",
+      "name": "Theme/Concept"
+    },
+    {
+      "id": "wow",
+      "name": "Wow Factor"
+    },
+    {
+      "id": "stage",
+      "name": "Stage Presence"
+    }
+  ],
+  "contestants": [
+    {
+      "id": "c1",
+      "name": "Vampire Vicki",
+      "number": 1
+    },
+    {
+      "id": "c2",
+      "name": "Zombie Zack",
+      "number": 2
+    },
+    {
+      "id": "c3",
+      "name": "Pumpkin Piper",
+      "number": 3
+    },
+    {
+      "id": "c4",
+      "name": "Ghostly Gina",
+      "number": 4
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Results — Halloween Contest</title>
+  <link rel="stylesheet" href="/assets/style.css"/>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>🧮 Live Results</h1>
+      <div class="kpi">
+        <div>Event: <strong id="eventName">—</strong></div>
+        <div>Ballots: <strong id="ballots">0</strong></div>
+        <div>Last update: <strong id="stamp">—</strong></div>
+      </div>
+      <hr>
+
+      <h2>Overall Leaderboard</h2>
+      <div id="overall"></div>
+
+      <hr>
+      <h2>By Category</h2>
+      <div id="bycat"></div>
+    </div>
+    <div class="footer">Auto-refreshes every 2 seconds.</div>
+  </div>
+
+<script type="module">
+const cfg = await fetch('/assets/config.json').then(r=>r.json());
+document.getElementById('eventName').textContent = cfg.eventName;
+
+function barRow(label, value, max) {
+  const wrap = document.createElement('div'); wrap.style.marginBottom='10px';
+  const top = document.createElement('div'); top.className='row';
+  const ln = document.createElement('div'); ln.textContent = label;
+  const val = document.createElement('div'); val.textContent = value.toFixed(1);
+  top.append(ln,val);
+  const prog = document.createElement('div'); prog.className='progress';
+  const fill = document.createElement('div'); fill.style.width = (max>0?(value/max*100):0) + '%';
+  prog.appendChild(fill);
+  wrap.append(top, prog);
+  return wrap;
+}
+
+async function load() {
+  const res = await fetch('/.netlify/functions/results');
+  const data = await res.json();
+  document.getElementById('ballots').textContent = data.ballots || 0;
+  document.getElementById('stamp').textContent = new Date().toLocaleTimeString();
+
+  const overall = document.getElementById('overall');
+  overall.innerHTML = '';
+  const top = Math.max(...data.overall.map(o=>o.total), 1);
+  for (const row of data.overall) {
+    overall.appendChild(barRow(`#${row.number} — ${row.name}`, row.total, top));
+  }
+
+  const bycat = document.getElementById('bycat');
+  bycat.innerHTML='';
+  for (const cat of data.byCategory) {
+    const card = document.createElement('div');
+    card.style.marginBottom='18px';
+    const h = document.createElement('div');
+    h.textContent = cat.name; h.style.fontWeight='700'; h.style.marginBottom='8px';
+    card.appendChild(h);
+    const topc = Math.max(...cat.rows.map(r=>r.score), 1);
+    for (const r of cat.rows) card.appendChild(barRow(`#${r.number} — ${r.name}`, r.score, topc));
+    bycat.appendChild(card);
+  }
+}
+
+load();
+setInterval(load, 2000);
+</script>
+</body>
+</html>

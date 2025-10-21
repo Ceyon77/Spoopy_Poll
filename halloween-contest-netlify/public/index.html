@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Halloween Contest — Vote</title>
+  <link rel="stylesheet" href="/assets/style.css"/>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>🎃 Halloween Costume Contest</h1>
+      <h2>Judge Ballot</h2>
+      <p class="badge" id="eventName">Loading…</p>
+      <hr>
+
+      <div class="grid grid-2">
+        <div>
+          <label>Judge PIN</label>
+          <input id="pin" placeholder="4-digit PIN (one use)" maxlength="8" />
+        </div>
+        <div>
+          <label>Contestant</label>
+          <select id="contestant"></select>
+        </div>
+      </div>
+
+      <hr>
+      <div id="scores"></div>
+
+      <button id="submitBtn">Submit Vote</button>
+      <div class="footer" id="msg"></div>
+    </div>
+  </div>
+
+<script type="module">
+const cfg = await fetch('/assets/config.json').then(r=>r.json());
+const judges = await fetch('/assets/judges.json').then(r=>r.json());
+
+document.getElementById('eventName').textContent = cfg.eventName;
+
+const contestantSel = document.getElementById('contestant');
+for (const c of cfg.contestants) {
+  const opt = document.createElement('option');
+  opt.value = c.id;
+  opt.textContent = `#${c.number} — ${c.name}`;
+  contestantSel.appendChild(opt);
+}
+
+const scoresDiv = document.getElementById('scores');
+function renderScores() {
+  scoresDiv.innerHTML = '';
+  for (const cat of cfg.categories) {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const label = document.createElement('label');
+    label.textContent = cat.name;
+    label.style.minWidth = '160px';
+    const input = document.createElement('input');
+    input.type = 'range';
+    input.min = cfg.scoring.scaleMin;
+    input.max = cfg.scoring.scaleMax;
+    input.value = Math.round((cfg.scoring.scaleMin + cfg.scoring.scaleMax)/2);
+    input.className = 'score-input';
+    input.id = `score-${cat.id}`;
+    const val = document.createElement('span');
+    val.textContent = input.value;
+    input.addEventListener('input', ()=> val.textContent = input.value);
+    row.appendChild(label); row.appendChild(input); row.appendChild(val);
+    scoresDiv.appendChild(row);
+  }
+}
+renderScores();
+
+document.getElementById('submitBtn').addEventListener('click', async () => {
+  const msg = document.getElementById('msg');
+  msg.textContent = '';
+  const pin = document.getElementById('pin').value.trim();
+  if (!judges.pins.includes(pin)) {
+    msg.textContent = 'Invalid judge PIN.'; return;
+  }
+
+  const contestantId = contestantSel.value;
+  const scores = {};
+  for (const cat of cfg.categories) {
+    const v = Number(document.getElementById(`score-${cat.id}`).value);
+    scores[cat.id] = v;
+  }
+
+  const res = await fetch('/.netlify/functions/vote', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ pin, contestantId, scores })
+  });
+
+  if (res.ok) {
+    const data = await res.json();
+    if (data.error) { msg.textContent = data.error; return; }
+    msg.textContent = '✅ Vote submitted! Thank you.';
+    // prevent resubmits
+    document.getElementById('submitBtn').disabled = true;
+  } else {
+    msg.textContent = 'Something went wrong submitting your vote.';
+  }
+});
+</script>
+</body>
+</html>

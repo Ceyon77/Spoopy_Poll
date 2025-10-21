@@ -1,6 +1,6 @@
 [build]
   publish = "public"
-  command = "mpn ci || mpn i"
+  command = "npm ci || mpn i"
 
 [functions]
   directory = "netlify/functions"

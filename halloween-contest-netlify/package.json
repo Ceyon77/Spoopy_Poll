@@ -8,8 +8,6 @@
     "build": "echo 'No build step'",
     "serve": "netlify dev"
   },
-  "dependencies": {
-    "@netlify/blobs": "^6.3.0"
-  },
+  "dependencies": { "@netlify/blobs": "^6.3.0" },
   "devDependencies": {}
 }
